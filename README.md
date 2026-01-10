@@ -15,14 +15,19 @@ Ky projekt krijon nje *virtual disk* ('disk.img') me madhesi 1MB, me nje struktu
 
 ## Screenshote
 
+**Struktura e file-ve te Sistemit**
 ![Struktura e file-ve te Sistemit](images/screenshot1.png)
 
+**Terminal Interaktiv**
 ![Terminal Interaktiv](images/screenshot2.png)
 
+**Superblock**
 ![Superblock](images/screenshot3.png)
 
+**Ndryshimet i inode bitmap**
 ![Ndryshimi i inode bitmap](images/screenshot4.png)
 
+**Hyrjet ne Direktory**
 ![Hyrjet ne Direktory](images/screenshot5.png)
 
 ## Specifikimet
