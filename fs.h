@@ -11,6 +11,7 @@
 
 #define MAX_INODES 128
 #define FILENAME_LEN 28
+#define INODE_DIRECT_PTRS 12
 
 #define ROOT_INODE 0
 
@@ -25,6 +26,8 @@ typedef struct
 typedef struct
 {
     uint8_t used;
+    uint32_t size;
+    uint32_t blocks[INODE_DIRECT_PTRS];
 } Inode;
 
 typedef struct
@@ -36,5 +39,6 @@ typedef struct
 /* API */
 void fs_init();
 void fs_create(const char *name);
+void fs_read(const char *name);
 
 #endif

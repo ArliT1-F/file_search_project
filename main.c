@@ -20,13 +20,19 @@ int main()
         {
             fs_create(line + 7);
         }
+        else if (strncmp(line, "read ", 5) == 0)
+        {
+            fs_read(line + 5);
+        }
         else if (strcmp(line, "exit") == 0)
         {
             break;
         }
         else
         {
-            printf("Komanda e vetme qe suportohet: create <filename>\n");
+            printf("Komandat qe suportohen jane: create <filename>\n"
+                   "                           read <filename>\n"
+                   "                           exit\n");
         }
     }
 
