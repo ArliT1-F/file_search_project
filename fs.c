@@ -38,7 +38,7 @@ static int bitmap_find_tree(uint8_t *bm, int max) {
 static void read_inode(int idx, Inode *ino) {
     uint32_t block = INODE_TABLE_START + idx / INODES_PER_BLOCK;
     Inode buf[INODES_PER_BLOCK];
-    disk_read_blocks(block, buf);
+    disk_read_block(block, buf);
     *ino = buf[idx % INODES_PER_BLOCK];
 }
 
@@ -49,6 +49,66 @@ static void write_inode(int idx, Inode *ino)
     disk_read_block(block, buf);
     buf[idx % INODES_PER_BLOCK] = *ino;
     disk_write_block(block, buf);
+}
+
+/* -- Directory -- */
+
+static int dir_find(const char *name)
+{
+    Inode root;
+    read_inode(ROOT_INODE, &root);
+
+    for (int i = 0; i < INODE_DIRECT_PTRS; i++)
+    {
+        if (!root.blocks[i])
+            continue;
+
+        DirEntry entries[BLOCK_SIZE / sizeof(DirEntry)];
+        disk_read_block(root.blocks[i], entries);
+
+        for (int j = 0; j < (int)(BLOCK_SIZE / sizeof(DirEntry)); j++)
+        {
+            if (entries[j].inode != 0 &&
+                strncmp(entries[j].name, name, FILENAME_LEN) == 0)
+                return entries[j].inode;
+        }
+    }
+    return -1;
+}
+
+static void dir_add(const char *name, int inode_idx)
+{
+    Inode root;
+    read_inode(ROOT_INODE, &root);
+
+    uint8_t block_bm[BLOCK_SIZE];
+    disk_read_block(BLOCK_BITMAP_BLOCK, block_bm);
+
+    for (int i = 0; i < INODE_DIRECT_PTRS; i++)
+    {
+        if (root.blocks[i] == 0)
+        {
+            int b = bitmap_find_free(block_bm, TOTAL_BLOCKS);
+            block_bm[b] = 1;
+            root.blocks[i] = b;
+            disk_write_block(BLOCK_BITMAP_BLOCK, block_bm);
+            write_inode(ROOT_INODE, &root);
+        }
+
+        DirEntry entries[BLOCK_SIZE / sizeof(DirEntry)];
+        disk_read_block(root.blocks[i], entries);
+
+        for (int j = 0; j < (int)(BLOCK_SIZE / sizeof(DirEntry)); j++)
+        {
+            if (entries[j].inode == 0)
+            {
+                strncpy(entries[j].name, name, FILENAME_LEN);
+                entries[j].inode = inode_idx;
+                disk_write_block(root.blocks[i], entries);
+                return;
+            }
+        }
+    }
 }
 
 /* -- Formatimi i Diskut -- */
